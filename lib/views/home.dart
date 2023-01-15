@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lecture_01_basics/models/contact.dart';
 import 'package:lecture_01_basics/models/contact_book.dart';
 import 'package:lecture_01_basics/views/add_contact.dart';
 
@@ -7,22 +8,42 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ContactBook contactBook = ContactBook();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
       ),
-      body: ListView.builder(itemBuilder: (context, index) {
-        final contact = contactBook.contact(atIndex: index);
-        return ListTile(
-          title: Text(contact!.name),
-        );
-      }),
+      body: ValueListenableBuilder(
+        valueListenable: ContactBook(),
+        builder: (context, value, child) {
+          final contacts = value;
+          return ListView.builder(
+            itemCount: contacts.length,
+            itemBuilder: (context, index) {
+              final contact = contacts[index];
+              return Dismissible(
+                onDismissed: (direction) {
+                  ContactBook().remove(contact: contact);
+                },
+                key: ValueKey(contact.id),
+                child: Material(
+                  elevation: 6,
+                  child: ListTile(
+                    title: Text(contact.name),
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (_){
-            AddContact(),
-          },))
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const AddContactPage(),
+            ),
+          );
         },
         child: const Icon(Icons.add),
       ),
